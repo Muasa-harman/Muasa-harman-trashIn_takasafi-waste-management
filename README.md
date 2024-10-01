@@ -1,9 +1,5 @@
 ![alt text](activation1.png) ![alt text](3715d133-f3fa-4c16-b392-87762d3d74f6.webp) ![alt text](activation2.png)
 
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
