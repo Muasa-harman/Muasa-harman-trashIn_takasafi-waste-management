@@ -1,0 +1,28 @@
+version: '3'
+services:
+  backend:
+    build: ./takasafi
+    ports:
+      - "5000:5000"
+      - "4001:4001"
+      - "4002:4002"
+      - "4003:4003"
+    volumes:
+      - ./backend:/dist/
+    command: npm start
+    networks:
+      - myapp-network
+
+  client:
+    build: ./trashIn
+    ports:
+      - "8081:8081" 
+    volumes:
+      - ./trashIn:/app
+    command: npm run dev -- --host
+    networks:
+      - myapp-network
+
+networks:
+  myapp-network:
+    driver: bridge
