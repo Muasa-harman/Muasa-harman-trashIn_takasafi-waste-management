@@ -5,7 +5,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+[Nest] framework TypeScript microservices with users authentication and waste collection apis starter repository.
 
 ## Installation
 
