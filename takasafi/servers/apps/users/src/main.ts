@@ -10,5 +10,6 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'servers/email-templates'));
   app.setViewEngine('ejs');
   await app.listen(4001);
+  console.log("this is the users service...")
 }
 bootstrap();
