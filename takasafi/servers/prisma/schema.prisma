@@ -90,3 +90,48 @@ model Company {
 
 
 
+users
+id (Primary Key, UUID) — Unique user ID.
+name (VARCHAR) — User's name.
+email (VARCHAR, Unique) — User's email address.
+password (VARCHAR) — User's hashed password.
+role (ENUM: 'USER', 'MUNICIPALITY_ADMIN', 'COMPANY_ADMIN') — Role of the user.
+created_at (TIMESTAMP) — Date when the user was created.
+
+companies
+id (Primary Key, UUID) — Unique company ID.
+name (VARCHAR) — Company name.
+address (VARCHAR) — Company address.
+phone_number (VARCHAR) — Company contact number.
+created_at (TIMESTAMP) — Date when the company was created.
+admin_id (Foreign Key, references users(id)) — Refers to the admin responsible for the company.
+municipality_admins
+id (Primary Key, UUID) — Unique ID for municipality admin.
+user_id (Foreign Key, references users(id)) — Refers to the user associated with the municipality admin.
+municipality_name (VARCHAR) — Name of the municipality the admin is responsible for.
+created_at (TIMESTAMP) — Date when the admin was created.
+
+trucks
+id (Primary Key, UUID) — Unique truck ID.
+plate_number (VARCHAR) — License plate number.
+company_id (Foreign Key, references companies(id)) — Refers to the company that owns the truck.
+model (VARCHAR) — Truck model.
+capacity (INT) — Capacity of the truck (in tons).
+status (ENUM: 'AVAILABLE', 'IN_MAINTENANCE', 'ASSIGNED') — Current status of the truck.
+created_at (TIMESTAMP) — Date when the truck was added.
+
+routes
+id (Primary Key, UUID) — Unique route ID.
+route_name (VARCHAR) — Name of the route.
+municipality_id (Foreign Key, references municipality_admins(id)) — Refers to the municipality that manages the route.
+start_location (VARCHAR) — Starting point of the route.
+end_location (VARCHAR) — Ending point of the route.
+distance (DECIMAL) — Distance of the route in kilometers.
+created_at (TIMESTAMP) — Date when the route was created.
+
+truck_routes
+id (Primary Key, UUID) — Unique ID for truck-route assignment.
+truck_id (Foreign Key, references trucks(id)) — Refers to the truck assigned to the route.
+route_id (Foreign Key, references routes(id)) — Refers to the route.
+assigned_date (TIMESTAMP) — Date when the truck was assigned to the route.
+status (ENUM: 'PENDING', 'IN_PROGRESS', 'COMPLETED') — Status of the truck on the route.
