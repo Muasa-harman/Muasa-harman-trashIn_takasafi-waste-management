@@ -39,3 +39,9 @@ export class TrucksListRelationFilter{
     some?:TruckWhereInput
     none: TruckWhereInput
 }
+
+@InputType()
+export class TruckRelationFilter{
+    is?:TruckWhereInput
+    isNot?:TruckWhereInput
+}
