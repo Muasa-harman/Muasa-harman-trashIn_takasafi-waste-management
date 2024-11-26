@@ -23,6 +23,11 @@ Prisma.CompanyOrderByWithRelationInput
 }
 
 @InputType()
+export class CompanyOrderByWithRelationInput extends PartialType(
+    CompanyOrderByWithRelationInputStrict,
+){}
+
+@InputType()
 export class CompanyOrderByRelationAggregateInput{
     @Field(()=>Prisma.SortOrder)
     _count?:Prisma.SortOrder

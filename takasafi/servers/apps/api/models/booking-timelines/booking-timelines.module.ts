@@ -3,6 +3,7 @@ import { BookingTimelinesService } from './booking-timelines.service';
 import { BookingTimelinesResolver } from './booking-timelines.resolver';
 
 @Module({
-  providers: [BookingTimelinesService, BookingTimelinesResolver]
+  providers: [BookingTimelinesService, BookingTimelinesResolver],
+  exports:[BookingTimelinesService]
 })
 export class BookingTimelinesModule {}

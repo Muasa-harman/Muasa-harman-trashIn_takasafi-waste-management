@@ -3,6 +3,7 @@ import { DriverService } from './driver.service';
 import { DriverResolver } from './driver.resolver';
 
 @Module({
-  providers: [DriverService, DriverResolver]
+  providers: [DriverService, DriverResolver],
+  exports:[DriverService]
 })
 export class DriverModule {}

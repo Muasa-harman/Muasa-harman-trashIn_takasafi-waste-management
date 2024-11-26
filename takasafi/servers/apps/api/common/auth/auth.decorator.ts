@@ -7,7 +7,7 @@ import { GqlExecutionContext } from "@nestjs/graphql";
 export const AllowAuthenticated = (...roles: Role[]) =>
     applyDecorators(SetMetadata('roles', roles), UseGuards(AuthGuard))
 
-export const getUser = createParamDecorator((data,ctx: ExecutionContext)=>{
+export const GetUser = createParamDecorator((data,ctx: ExecutionContext)=>{
     const context = GqlExecutionContext.create(ctx)
     return context.getContext().req.user
 })
