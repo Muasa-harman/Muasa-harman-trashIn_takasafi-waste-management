@@ -6,7 +6,7 @@ import {CreateDriverAssignmentInputWithoutBookingId} from ""
 @InputType()
 export class CreateBookingInput extends PickType(
     Booking,
-    ['customerId','vehicleNumber','phoneNumber']
+    ['customerId','vehicleNumber','phoneNumber'],
     InputType,
 ){
     truckId:Truck['id']

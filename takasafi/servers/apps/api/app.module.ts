@@ -5,6 +5,8 @@ import {ConfigModule} from '@nestjs/config';
 import { GraphQLModule } from "@nestjs/graphql";
 import { join } from "path";
 import { PrismaModule } from "./common/prisma/prisma.module";
+import { ReviewsService } from './src/reviews/reviews.service';
+import { ReviewsResolver } from './src/reviews/reviews.resolver';
 
 
 @Module({
@@ -25,4 +27,5 @@ import { PrismaModule } from "./common/prisma/prisma.module";
         // mpesa
         UsersModule,
     ],
+    providers: [ReviewsService, ReviewsResolver],
 })

@@ -37,6 +37,7 @@ export class StringFilter{
     not?:string
     @Field(()=>Prisma.QueryMode)
     mode?:Prisma.QueryMode
+    is: any
 }
 
 @InputType()
