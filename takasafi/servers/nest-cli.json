@@ -27,6 +27,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/users/tsconfig.app.json"
       }
+    },
+    "driver": {
+      "type": "application",
+      "root": "apps/driver",
+      "entryFile": "main",
+      "sourceRoot": "apps/driver/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/driver/tsconfig.app.json"
+      }
     }
   }
 }

@@ -5,7 +5,7 @@ import { ApolloDriverConfig, ApolloFederationDriver } from '@nestjs/apollo';
 import {ConfigService} from '@nestjs/config';
 import {JwtService} from '@nestjs/jwt'
 import { UsersService } from './users.service';
-import { PrismaService }  from '../../../prisma/Prisma.service'
+import { PrismaService }  from '../../../prisma/Prisma.service';
 import { UsersResolver } from './user.resolver';
 import { EmailModule } from './email/email.module';
 

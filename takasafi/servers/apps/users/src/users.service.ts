@@ -2,9 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import {ConfigService} from '@nestjs/config'
 import {JwtService, JwtVerifyOptions} from '@nestjs/jwt'
 import { ActivationDto, LoginDto, RegisterDto } from './dto/user.dto';
-// import { PrismaService } from 'prisma/Prisma.service';
-import { PrismaService }  from '../../../prisma/Prisma.service'
 import { Response } from 'express';
+import {PrismaService} from '../../../prisma/Prisma.service'
 import * as bcrypt from 'bcrypt'
 import { EmailService } from './email/email.service';
 import { TokenSender } from './utils/sendToken';
@@ -14,7 +13,7 @@ interface UserData{
   name: string;
   email: string;
   password: string;
-  phone_number: number;
+  phoneNumber: number;
   address: string
 }
 
@@ -29,7 +28,7 @@ export class UsersService {
 
   //register user service
   async register(registerDto: RegisterDto, response: Response){
-    const {name, email, password,phone_number,address} = registerDto;
+    const {name, email, password,phoneNumber,address} = registerDto;
     const IsEmailExist = await this.prisma.user.findUnique({
       where: {
         email,
@@ -42,7 +41,7 @@ export class UsersService {
 
     const isPhoneNumberExist = await this.prisma.user.findFirst({
       where: {
-        phone_number
+        phoneNumber,
       },
     });
 
@@ -58,8 +57,10 @@ export class UsersService {
         name,
         email,
         password: hashedPassword,
-        phone_number,
-        address: address || null,
+        address,
+        phoneNumber,
+        role:'User'
+      
     };
 
     // Generate activation token
@@ -113,7 +114,7 @@ export class UsersService {
       throw new BadRequestException("Invalid activation code")
     }
 
-    const  {name,email,password,phone_number} = newUser.user;
+    const  {name,email,password,phoneNumber,address} = newUser.user;
 
     const existUser = await this.prisma.user.findUnique({
       where: {
@@ -130,7 +131,9 @@ export class UsersService {
       name,
       email,
       password,
-      phone_number,
+      phoneNumber,
+      address,
+      role:'USER'
     },
     })
     return {user,response}

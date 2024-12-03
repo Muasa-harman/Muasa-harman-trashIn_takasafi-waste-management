@@ -28,7 +28,7 @@ export class User{
     email: string;
 
     @Field()
-    phone_number: number;
+    phoneNumber?: number;
     
     @Field({nullable: true})
     address?: string;

@@ -20,7 +20,7 @@ export class RegisterDto {
 
     @Field()
     @IsNotEmpty({message: 'phone Number is required. '})
-    phone_number: number;
+    phoneNumber: number;
 
     @Field()
     @IsNotEmpty({message: 'Address is required. '})

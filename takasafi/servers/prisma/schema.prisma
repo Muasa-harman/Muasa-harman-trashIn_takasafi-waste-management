@@ -1,137 +1,192 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  Admin
-  User
+generator client {
+  provider = "prisma-client-js"
 }
 
-model Avatars {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  public_id String
+model Avatar {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   url       String
-  user      User   @relation(fields: [userId], references: [id])
-  userId    String @unique @db.ObjectId
+  userId    String   @db.ObjectId @unique  // Add @unique to userId to resolve the one-to-one relation
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  driver    Driver?  @relation
+  admin     Admin?   @relation
+}
+
+
+enum Role {
+  USER
+  ADMIN
+  DRIVER
 }
 
 model User {
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  email           String            @unique
+  phoneNumber     Float?
+  address         String?
+  password        String
+  avatar          Avatar?
+  reviewsGiven    Reviews[]         @relation("Reviewer")
+  reviewsReceived Reviews[]         @relation("ReviewedUser")
+  role            Role
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  trucks          Truck[]           // Simplified relationship to Truck
+  checkouts       Checkout[]        // Payments made by the user
+  receipts        Receipt[]         // Receipts associated with the user
+  truckRoutes     TruckRoute[]      // Relationship with TruckRoute
+}
+
+model Truck {
+  id           String          @id @default(auto()) @map("_id") @db.ObjectId
+  licensePlate String          @unique
+  model        String
+  driverId     String          @db.ObjectId
+  userId       String          @db.ObjectId    // Foreign key to User
+  routes       TruckRoute[]    // Routes assigned to the truck (many-to-many relationship via TruckRoute)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  driver       Driver          @relation("DriverTrucks", fields: [driverId], references: [id])
+  user         User            @relation(fields: [userId], references: [id]) // Relation field in Truck to User
+}
+
+model Driver {
   id           String    @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   email        String    @unique
-  // phone_number Float? @unique  ===> we can't use this line because sometime our phone number is null and then we can't compare it
-  phone_number Float?
+  phoneNumber  Float?
   address      String?
   password     String
-  avatar       Avatars?
-  reviews      Reviews[]
-  role         Role      @default(User)
+  avatar       Avatar?   @relation(fields: [avatarsId], references: [id])
+  reviews      Reviews[] @relation("DriverReviews") // Reviews about the driver
+  role         Role
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  trucks       Truck[]   @relation("DriverTrucks") // Trucks related to the driver
+  avatarsId    String?   @db.ObjectId @unique // Mark avatarsId as unique
+}
 
-  @@unique([email, phone_number], name: "unique_email_phone_number") // In this approach, a composite unique constraint (@@unique) is created on both email and phone_number. This allows phone_number to be null but enforces uniqueness when phone_number is not null.
+model Admin {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String    @unique
+  password  String
+  avatar    Avatar?   @relation(fields: [avatarsId], references: [id])
+  reviews   Reviews[] @relation("AdminReviews") // Reviews about the admin
+  role      Role
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  avatarsId String?   @db.ObjectId @unique // Mark avatarsId as unique
 }
 
 model Reviews {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  review String
-  rating Float
-  userId String @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
-  track   Tracks  @relation(fields: [trackId], references: [id])
-  trackId String @db.ObjectId
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  rating         Int
+  comment        String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  reviewer       User     @relation("Reviewer", fields: [reviewerId], references: [id])
+  reviewerId     String   @db.ObjectId
+  reviewedUser   User     @relation("ReviewedUser", fields: [reviewedUserId], references: [id])
+  reviewedUserId String   @db.ObjectId
+  driver         Driver?  @relation("DriverReviews", fields: [driverId], references: [id])
+  driverId       String?  @db.ObjectId
+  admin          Admin?   @relation("AdminReviews", fields: [adminId], references: [id])
+  adminId        String?  @db.ObjectId
+
+  @@index([reviewerId])
+  @@index([reviewedUserId])
+  @@index([driverId])
+  @@index([adminId])
 }
 
-model Images {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  public_id String
-  url       String
-  trackId    String @db.ObjectId
-  track      Tracks  @relation(fields: [trackId], references: [id])
+model Route {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  startPoint  String
+  endPoint    String
+  distance    Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  trucks      TruckRoute[]
 }
 
-model Tracks {
-  id             String     @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  description    String
-  driver    String
-  plate_number String
-  price          Int
-  on_demandPrice     Int?
-  phone          String
-  category       String
-  images         Images[]
-  companyId   String     @db.ObjectId
-  company     Company @relation(fields: [companyId], references: [id])
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  Reviews        Reviews[]
+model TruckRoute {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  truckId     String   @db.ObjectId
+  userId      String   @db.ObjectId        // Foreign key to User
+  routeId     String   @db.ObjectId
+  assignedAt  DateTime @default(now())      // Date when the truck was assigned to the route
+  truck       Truck    @relation(fields: [truckId], references: [id])
+  route       Route    @relation(fields: [routeId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+
+  checkouts   Checkout[] // Add this line
+  receipts    Receipt[]  // Add this line
+
+  @@index([truckId])
+  @@index([userId])
+  @@index([routeId])
 }
 
-model Company {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  country      String
-  area_code       String
-  address      String
-  email        String   @unique
-  phone_number Float    @unique
-  role         Role      @default(Admin)
-  password     String
-  Tracks        Tracks[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model Checkout {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  truckRouteId    String    @db.ObjectId        // Foreign key to TruckRoute
+  userId          String    @db.ObjectId        // Foreign key to User
+  amount          Float                         // Payment amount
+  paymentMethod   PaymentMethod                 // Enum for payment methods
+  status          PaymentStatus                 // Enum for payment status
+  transactionDate DateTime  @default(now())     // Timestamp for the transaction
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  truckRoute      TruckRoute  @relation(fields: [truckRouteId], references: [id])
+  user            User        @relation(fields: [userId], references: [id])
+  receipts        Receipt[]   // Receipts generated for this payment
+
+  @@index([truckRouteId])
+  @@index([userId])
 }
 
+enum PaymentMethod {
+  CreditCard
+  PayPal
+  Mpesa
+  BankTransfer
+}
 
+enum PaymentStatus {
+  Pending
+  Completed
+  Failed
+  Refunded
+}
 
-users
-id (Primary Key, UUID) — Unique user ID.
-name (VARCHAR) — User's name.
-email (VARCHAR, Unique) — User's email address.
-password (VARCHAR) — User's hashed password.
-role (ENUM: 'USER', 'MUNICIPALITY_ADMIN', 'COMPANY_ADMIN') — Role of the user.
-created_at (TIMESTAMP) — Date when the user was created.
+model Receipt {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  receiptNumber   String    @unique              // Unique receipt identifier
+  checkoutId      String    @db.ObjectId        // Foreign key to Checkout
+  truckRouteId    String    @db.ObjectId        // Foreign key to TruckRoute
+  userId          String    @db.ObjectId        // Foreign key to User
+  amount          Float                         // Payment amount
+  issuedDate      DateTime  @default(now())     // Date the receipt was issued
+  paymentMethod   PaymentMethod                 // Enum for payment methods
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-companies
-id (Primary Key, UUID) — Unique company ID.
-name (VARCHAR) — Company name.
-address (VARCHAR) — Company address.
-phone_number (VARCHAR) — Company contact number.
-created_at (TIMESTAMP) — Date when the company was created.
-admin_id (Foreign Key, references users(id)) — Refers to the admin responsible for the company.
-municipality_admins
-id (Primary Key, UUID) — Unique ID for municipality admin.
-user_id (Foreign Key, references users(id)) — Refers to the user associated with the municipality admin.
-municipality_name (VARCHAR) — Name of the municipality the admin is responsible for.
-created_at (TIMESTAMP) — Date when the admin was created.
+  checkout        Checkout  @relation(fields: [checkoutId], references: [id])
+  truckRoute      TruckRoute @relation(fields: [truckRouteId], references: [id])
+  user            User      @relation(fields: [userId], references: [id])
 
-trucks
-id (Primary Key, UUID) — Unique truck ID.
-plate_number (VARCHAR) — License plate number.
-company_id (Foreign Key, references companies(id)) — Refers to the company that owns the truck.
-model (VARCHAR) — Truck model.
-capacity (INT) — Capacity of the truck (in tons).
-status (ENUM: 'AVAILABLE', 'IN_MAINTENANCE', 'ASSIGNED') — Current status of the truck.
-created_at (TIMESTAMP) — Date when the truck was added.
-
-routes
-id (Primary Key, UUID) — Unique route ID.
-route_name (VARCHAR) — Name of the route.
-municipality_id (Foreign Key, references municipality_admins(id)) — Refers to the municipality that manages the route.
-start_location (VARCHAR) — Starting point of the route.
-end_location (VARCHAR) — Ending point of the route.
-distance (DECIMAL) — Distance of the route in kilometers.
-created_at (TIMESTAMP) — Date when the route was created.
-
-truck_routes
-id (Primary Key, UUID) — Unique ID for truck-route assignment.
-truck_id (Foreign Key, references trucks(id)) — Refers to the truck assigned to the route.
-route_id (Foreign Key, references routes(id)) — Refers to the route.
-assigned_date (TIMESTAMP) — Date when the truck was assigned to the route.
-status (ENUM: 'PENDING', 'IN_PROGRESS', 'COMPLETED') — Status of the truck on the route.
+  @@index([checkoutId])
+  @@index([truckRouteId])
+  @@index([userId])
+}
